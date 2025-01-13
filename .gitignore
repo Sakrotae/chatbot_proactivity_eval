@@ -25,5 +25,3 @@ dist-ssr
 
 .bolt/*
 .env
-.bolt/config.json
-.bolt/prompt
