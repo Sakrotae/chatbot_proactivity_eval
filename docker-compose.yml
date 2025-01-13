@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chatbot-eval-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-eval-backend
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/chatbot_eval
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:15-alpine
+    container_name: chatbot-eval-db
+    environment:
+      - POSTGRES_DB=chatbot_eval
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  chatbot-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,50 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Development files
+*.log
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build artifacts
+dist
+build
+*.egg-info
+
+# Documentation
+README.md
+CHANGELOG.md
+docs
+
+# Test files
+tests
+coverage
+.coverage
+.pytest_cache
+
+# Docker
+Dockerfile
+docker-compose.yml
+.docker
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
