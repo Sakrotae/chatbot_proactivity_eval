@@ -4,40 +4,34 @@ A full-stack application for conducting user experience evaluations of chatbot i
 
 ## Getting Started
 
-### Frontend Setup
+### Quick Start with Docker
 
-1. Install dependencies:
+1. Clone the repository:
 ```bash
-npm install
+git clone https://github.com/Sakrotae/chatbot_proactivity_eval
+cd chatbot_proactivity_eval
 ```
 
-2. Start development server:
+2. Create environment file:
 ```bash
-npm run dev
+cp .env.example .env
 ```
 
-### Backend Setup
+3. Configure environment variables in `.env`:
+```env
+# Database
+POSTGRES_PASSWORD=your_secure_password_here
+POSTGRES_USER=postgres
+POSTGRES_DB=chatbot_eval
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Application
+SECRET_KEY=your_secret_key_here
+FLASK_ENV=production
 ```
 
-2. Install dependencies:
+4. Start the application:
 ```bash
-cd backend
-pip install -r requirements.txt
-```
-
-3. Initialize the database:
-```bash
-flask init-db
-```
-
-4. Start the Flask server:
-```bash
-flask run
+docker-compose up -d
 ```
 
 ## Tech Stack
@@ -53,21 +47,6 @@ flask run
   - SQLAlchemy
   - Flask-CORS
   - SQLite database
-
-## Development
-
-- Run `npm run lint` to check for code style issues
-- Run `npm run build` to create a production build
-- Run `npm run preview` to preview the production build locally
-
-## Environment Variables
-
-Create a `.env` file in the backend directory:
-
-```env
-SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///chatbot_eval.db
-```
 
 ## License
 
