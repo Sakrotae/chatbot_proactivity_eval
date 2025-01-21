@@ -13,7 +13,7 @@ export const LandingPage: React.FC = () => {
         </h1>
         
         <p className="text-lg text-gray-600 mb-8">
-          Help us improve our chatbot by participating in this brief evaluation. Your feedback is valuable in enhancing the user experience.
+          Help us by participating in this brief evaluation. Your feedback is valuable in enhancing the user experience.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

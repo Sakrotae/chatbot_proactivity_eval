@@ -25,7 +25,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-blue-600 text-white ml-auto'
         }`}
       >
-        <p>{message.text}</p>
+        <p className="whitespace-pre-wrap break-words">{message.text}</p>
         <span className="text-xs opacity-70 mt-1 block">
           {message.timestamp.toLocaleTimeString()}
         </span>

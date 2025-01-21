@@ -1,7 +1,9 @@
 from flask import jsonify, request
+import asyncio
 from app import db
 from app.api import bp
 from app.models import User, Evaluation, Question, Response, ChatMessage
+from app.services.chat_service import ChatService
 from datetime import datetime
 import uuid
 
@@ -135,3 +137,68 @@ def get_results(evaluation_id):
     }
     
     return jsonify(results)
+
+
+@bp.route('/chat/message', methods=['POST'])
+def process_chat_message():
+    try:
+        data = request.json
+        evaluation_id = data.get('evaluationId')
+        message_content = data.get('message')
+        chat_history = data.get('history', [])
+        chat_history.append({
+            'role': 'user',
+            'content': message_content
+        })
+
+        print("message_content", message_content)
+        print("chat_history", chat_history)
+        
+        if not message_content:
+            return jsonify({'error': 'Message content is required'}), 400
+            
+        # Store user message
+        user_message = ChatMessage(
+            evaluation_id=evaluation_id,
+            sender='user',
+            content=message_content
+        )
+        db.session.add(user_message)
+        db.session.commit()
+        
+        # Process with Ollama
+        system_prompt = "You are a helpful AI assistant participating in a chatbot evaluation study. Provide clear, concise, and helpful responses."
+        chat_service = ChatService()
+        result = asyncio.run(chat_service.process_chat(chat_history, system_prompt))
+        
+        if result['success']:
+            # Store bot response
+            bot_message = ChatMessage(
+                evaluation_id=evaluation_id,
+                sender='bot',
+                content=result['content']
+            )
+            print("bot_message", result['content'])
+            print(result)
+            db.session.add(bot_message)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': {
+                    'id': bot_message.id,
+                    'content': bot_message.content,
+                    'timestamp': bot_message.timestamp.isoformat()
+                }
+            })
+        
+        return jsonify({
+            'success': False,
+            'error': result['error']
+        }), 500
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
