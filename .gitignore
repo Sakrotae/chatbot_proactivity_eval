@@ -25,3 +25,6 @@ dist-ssr
 
 .bolt/*
 .env
+backend/__pycache__/*
+*.pyc
+*.db
