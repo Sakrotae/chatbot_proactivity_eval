@@ -18,12 +18,16 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    env_file:
+      - .env
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: chatbot-eval-backend
+    ports:
+      - "5000:5000"
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=production
@@ -40,13 +44,15 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    env_file:
+      - .env
 
   db:
     image: postgres:15-alpine
     container_name: chatbot-eval-db
     environment:
-      - POSTGRES_DB=chatbot_eval
-      - POSTGRES_USER=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data

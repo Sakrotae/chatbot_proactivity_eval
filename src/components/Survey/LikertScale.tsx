@@ -21,13 +21,10 @@ export const LikertScale: React.FC<LikertScaleProps> = ({ value, onChange }) => 
           key={index}
           onClick={() => onChange(index + 1)}
           className="flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all
-            duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 likert-button"
           style={{
             backgroundColor: value === index + 1 ? option.color : '#F3F4F6',
             color: value === index + 1 ? '#FFFFFF' : '#374151',
-            ':hover': {
-              backgroundColor: option.hoverColor,
-            },
           }}
         >
           {option.label}

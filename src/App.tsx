@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { useEvaluationStore } from './store/evaluationStore';
 import { LandingPage } from './components/Landing/LandingPage';
-import { PreSurvey } from './components/Survey/PreSurvey';
 import { ChatInterface } from './components/Chat/ChatInterface';
-import { PostSurvey } from './components/Survey/PostSurvey';
 import { ResultsSummary } from './components/Results/ResultsSummary';
+import { DynamicSurvey } from './components/Survey/DynamicSurvey';
 
 function App() {
   const { currentStep, startEvaluation, endEvaluation } = useEvaluationStore();
@@ -17,9 +16,9 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {currentStep === 'landing' && <LandingPage />}
-      {currentStep === 'pre-survey' && <PreSurvey />}
+      {currentStep === 'pre-survey' && <DynamicSurvey type="pre" />}
       {currentStep === 'chat' && <ChatInterface />}
-      {currentStep === 'post-survey' && <PostSurvey />}
+      {currentStep === 'post-survey' && <DynamicSurvey type="post" />}
       {currentStep === 'results' && <ResultsSummary />}
     </div>
   );

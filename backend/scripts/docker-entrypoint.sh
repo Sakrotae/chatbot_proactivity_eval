@@ -27,6 +27,10 @@ while True:
 echo "Applying database migrations..."
 flask db upgrade
 
+# Initialize the database
+echo "Initializing the database..."
+flask init-db
+
 # Start the application
 echo "Starting application..."
 exec "$@"

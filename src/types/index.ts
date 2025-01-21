@@ -1,9 +1,18 @@
-export type LikertScale = 1 | 2 | 3 | 4 | 5;
+export type QuestionType = 'likert' | 'text' | 'multiple_choice' | 'boolean';
+export type SurveyType = 'pre' | 'post';
 
-export interface SurveyQuestion {
-  id: string;
+export interface Question {
+  id: number;
   text: string;
-  response?: LikertScale;
+  type: QuestionType;
+  required: boolean;
+  order: number;
+  survey_type: SurveyType;
+}
+
+export interface Response {
+  questionId: number;
+  answer: string | number;
 }
 
 export interface ChatMessage {
@@ -15,9 +24,13 @@ export interface ChatMessage {
 
 export interface EvaluationState {
   currentStep: 'landing' | 'pre-survey' | 'chat' | 'post-survey' | 'results';
-  preSurveyResponses: Record<string, LikertScale>;
-  postSurveyResponses: Record<string, LikertScale>;
+  evaluationId?: number;
+  sessionId?: string;
+  questions: Record<SurveyType, Question[]>;
+  responses: Record<SurveyType, Response[]>;
   chatHistory: ChatMessage[];
   startTime?: Date;
   endTime?: Date;
+  loading: boolean;
+  error?: string;
 }

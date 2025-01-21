@@ -14,7 +14,8 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
+    #CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
+    CORS(app)
     
     # Register blueprints
     from app.api import bp as api_bp
