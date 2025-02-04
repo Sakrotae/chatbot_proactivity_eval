@@ -8,6 +8,12 @@ class QuestionType(Enum):
     MULTIPLE_CHOICE = 'multiple_choice'
     BOOLEAN = 'boolean'
 
+class ChatSubjectType(Enum):
+    HEALTH_CARE_WELL_BEING = 'health_care_well_being'
+    EDUCATION = 'education'
+    ACTIVITY_SUPPORT = 'activity_support'
+    AMBIENT_INTELLIGENCE = 'ambient_intelligence'
+
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(500), nullable=False)
