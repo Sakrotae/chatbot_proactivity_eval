@@ -8,11 +8,20 @@ class QuestionType(Enum):
     MULTIPLE_CHOICE = 'multiple_choice'
     BOOLEAN = 'boolean'
 
-class ChatSubjectType(Enum):
-    HEALTH_CARE_WELL_BEING = 'health_care_well_being'
+class LanguageModel(Enum):
+    LLAMA = 'llama'
+    #GPT4O = 'gpt4o'
+    R1 = 'r1'
+
+class UseCase(Enum):
+    HEALTH_CARE = 'health_care'
     EDUCATION = 'education'
     ACTIVITY_SUPPORT = 'activity_support'
     AMBIENT_INTELLIGENCE = 'ambient_intelligence'
+
+class PromptType(Enum):
+    STANDARD = 'standard'
+    PROACTIVE = 'proactive'
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -20,7 +29,7 @@ class Question(db.Model):
     type = db.Column(db.String(50), nullable=False)
     required = db.Column(db.Boolean, default=True)
     order = db.Column(db.Integer, nullable=False)
-    survey_type = db.Column(db.String(50), nullable=False)  # 'pre' or 'post'
+    survey_type = db.Column(db.String(50), nullable=False)
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -62,10 +71,23 @@ class User(db.Model):
 class Evaluation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    language_model = db.Column(db.String(36), nullable=False)
+    use_case = db.Column(db.String(36), nullable=False)
+    prompt_type = db.Column(db.String(36), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime)
     responses = db.relationship('Response', backref='evaluation', lazy=True)
     chat_messages = db.relationship('ChatMessage', backref='evaluation', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'language_model': LanguageModel(self.language_model),
+            'use_case': UseCase(self.use_case),
+            'prompt_type': PromptType(self.prompt_type),
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat() if self.end_time else None
+        }
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)

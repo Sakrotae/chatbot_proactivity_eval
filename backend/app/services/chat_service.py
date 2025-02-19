@@ -2,41 +2,70 @@ import requests
 from typing import List, Dict, Any
 from datetime import datetime
 import json
+from app.models import LanguageModel, UseCase, PromptType
+from app.services.system_prompts import get_system_prompt
 
 class ChatService:
-    OLLAMA_API_URL = "http://137.250.171.154:5050/api/chat"
-    LLAMA_MODEL = "llama3.1"
+    API_ENDPOINTS = {
+        LanguageModel.LLAMA: "http://137.250.171.154:11434/api/chat",
+        #LanguageModel.GPT4O: "http://137.250.171.154:5050/api/chat",
+        LanguageModel.R1: "http://137.250.171.154:11434/api/chat"
+    }
     
-    @staticmethod
-    def format_messages(chat_history: List[Dict[str, str]], system_prompt: str) -> List[Dict[str, str]]:
+    def __init__(self, language_model: LanguageModel, use_case: UseCase, prompt_type: PromptType):
+        self.language_model = language_model
+        self.use_case = use_case
+        self.prompt_type = prompt_type
+        self.api_url = self.API_ENDPOINTS[language_model]
+    
+    def format_messages(self, chat_history: List[Dict[str, str]]) -> List[Dict[str, str]]:
+        system_prompt = get_system_prompt(self.use_case, self.prompt_type)
         return [
             {"role": "system", "content": system_prompt},
             *chat_history
         ]
     
-    @staticmethod
-    def create_payload(messages: List[Dict[str, str]]) -> Dict[str, Any]:
-        return {
-            "model": ChatService.LLAMA_MODEL,
+    def create_payload(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
+        base_config = {
             "messages": messages,
             "stream": False,
-            "provider": "ollama",
-            "temperature": 0.0,
-            "max_new_tokens": 4096,
-            "top_p": 0.95,
-            "top_k": 50,
             "resp_format": "json",
+            "options": {
+                "temperature": 0.0, 
+                "max_new_tokens": 4096,
+                "top_p": 0.95,
+                "top_k": 50, 
+            }
         }
+        
+        # Add model-specific configurations
+        if self.language_model == LanguageModel.LLAMA:
+            base_config.update({
+                "model": "llama3.1",
+                "provider": "ollama"
+            })
+        elif self.language_model == LanguageModel.R1:
+            base_config.update({
+                "model": "llama3.1",
+                "provider": "ollama"
+            })
+        else:
+            base_config.update({
+                "model": "llama3.1",
+                "provider": "ollama"
+            })
+
+            
+        return base_config
     
-    @staticmethod
-    async def process_chat(chat_history: List[Dict[str, str]], system_prompt: str) -> Dict[str, Any]:
+    async def process_chat(self, chat_history: List[Dict[str, str]]) -> Dict[str, Any]:
         try:
-            messages = ChatService.format_messages(chat_history, system_prompt)
-            payload = ChatService.create_payload(messages)
+            messages = self.format_messages(chat_history)
+            payload = self.create_payload(messages)
             headers = {"Content-Type": "application/json"}
             
             response = requests.post(
-                ChatService.OLLAMA_API_URL,
+                self.api_url,
                 json=payload,
                 headers=headers,
                 timeout=30

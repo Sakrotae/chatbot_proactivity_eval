@@ -2,8 +2,9 @@ from flask import jsonify, request
 import asyncio
 from app import db
 from app.api import bp
-from app.models import User, Evaluation, Question, Response, ChatMessage
+from app.models import LanguageModel, User, Evaluation, Question, Response, ChatMessage, PromptType, UseCase
 from app.services.chat_service import ChatService
+from app.services.randomization import RandomizationService
 from datetime import datetime
 import uuid
 
@@ -66,6 +67,7 @@ def submit_responses():
 
 @bp.route('/session', methods=['POST'])
 def create_session():
+    """Create a new session with randomized configuration"""
     session_id = str(uuid.uuid4())
     user = User(session_id=session_id)
     db.session.add(user)
@@ -74,89 +76,47 @@ def create_session():
 
 @bp.route('/evaluation', methods=['POST'])
 def start_evaluation():
+    """Start a new evaluation with randomized configuration"""
     session_id = request.json.get('session_id')
     user = User.query.filter_by(session_id=session_id).first_or_404()
     
+    # Get random configuration
+    language_model, use_case, prompt_type = RandomizationService.get_random_configuration()
+    
     evaluation = Evaluation(
         user_id=user.id,
+        language_model=language_model.value,
+        use_case=use_case.value,
+        prompt_type=prompt_type.value,
         start_time=datetime.utcnow()
     )
     db.session.add(evaluation)
     db.session.commit()
     
-    return jsonify({'evaluation_id': evaluation.id})
-
-@bp.route('/chat', methods=['POST'])
-def send_message():
-    data = request.json
-    evaluation_id = data.get('evaluation_id')
-    
-    message = ChatMessage(
-        evaluation_id=evaluation_id,
-        sender=data['sender'],
-        content=data['content']
-    )
-    db.session.add(message)
-    db.session.commit()
-    
-    if data['sender'] == 'user':
-        bot_response = ChatMessage(
-            evaluation_id=evaluation_id,
-            sender='bot',
-            content='Thank you for your message. How can I help you?'
-        )
-        db.session.add(bot_response)
-        db.session.commit()
-        
-        return jsonify({
-            'bot_response': {
-                'id': bot_response.id,
-                'content': bot_response.content,
-                'timestamp': bot_response.timestamp.isoformat()
-            }
-        })
-    
-    return jsonify({'status': 'success'})
-
-@bp.route('/results/<int:evaluation_id>', methods=['GET'])
-def get_results(evaluation_id):
-    evaluation = Evaluation.query.get_or_404(evaluation_id)
-    
-    responses = Response.query.filter_by(evaluation_id=evaluation_id).all()
-    
-    results = {
-        'start_time': evaluation.start_time.isoformat(),
-        'end_time': evaluation.end_time.isoformat() if evaluation.end_time else None,
-        'responses': [r.to_dict() for r in responses],
-        'chat_messages': [{
-            'id': msg.id,
-            'sender': msg.sender,
-            'content': msg.content,
-            'timestamp': msg.timestamp.isoformat()
-        } for msg in evaluation.chat_messages]
-    }
-    
-    return jsonify(results)
-
+    return jsonify({
+        'evaluation_id': evaluation.id,
+        'config': {
+            'language_model': language_model.value,
+            'use_case': use_case.value,
+            'prompt_type': prompt_type.value
+        }
+    })
 
 @bp.route('/chat/message', methods=['POST'])
 def process_chat_message():
+    """Process chat messages using the evaluation's configuration"""
     try:
         data = request.json
         evaluation_id = data.get('evaluationId')
         message_content = data.get('message')
         chat_history = data.get('history', [])
-        chat_history.append({
-            'role': 'user',
-            'content': message_content
-        })
-
-        print("message_content", message_content)
-        print("chat_history", chat_history)
         
         if not message_content:
             return jsonify({'error': 'Message content is required'}), 400
-            
+        
+        # Get evaluation configuration
+        evaluation = Evaluation.query.get_or_404(evaluation_id)
+        
         # Store user message
         user_message = ChatMessage(
             evaluation_id=evaluation_id,
@@ -166,10 +126,21 @@ def process_chat_message():
         db.session.add(user_message)
         db.session.commit()
         
-        # Process with Ollama
-        system_prompt = "You are a helpful AI assistant participating in a chatbot evaluation study. Provide clear, concise, and helpful responses."
-        chat_service = ChatService()
-        result = asyncio.run(chat_service.process_chat(chat_history, system_prompt))
+        # Initialize chat service with evaluation configuration
+        chat_service = ChatService(
+            language_model=  LanguageModel(evaluation.language_model),
+            use_case=UseCase(evaluation.use_case),
+            prompt_type=PromptType(evaluation.prompt_type)
+        )
+        
+        # Add user message to chat history
+        chat_history.append({
+            'role': 'user',
+            'content': message_content
+        })
+        
+        # Process with configured service
+        result = asyncio.run(chat_service.process_chat(chat_history))
         
         if result['success']:
             # Store bot response
@@ -178,8 +149,6 @@ def process_chat_message():
                 sender='bot',
                 content=result['content']
             )
-            print("bot_message", result['content'])
-            print(result)
             db.session.add(bot_message)
             db.session.commit()
             
@@ -202,3 +171,27 @@ def process_chat_message():
             'success': False,
             'error': str(e)
         }), 500
+
+@bp.route('/results/<int:evaluation_id>', methods=['GET'])
+def get_results(evaluation_id):
+    """Get evaluation results including configuration"""
+    evaluation = Evaluation.query.get_or_404(evaluation_id)
+    
+    results = {
+        'configuration': {
+            'language_model': evaluation.language_model.value,
+            'use_case': evaluation.use_case.value,
+            'prompt_type': evaluation.prompt_type.value
+        },
+        'start_time': evaluation.start_time.isoformat(),
+        'end_time': evaluation.end_time.isoformat() if evaluation.end_time else None,
+        'responses': [r.to_dict() for r in evaluation.responses],
+        'chat_messages': [{
+            'id': msg.id,
+            'sender': msg.sender,
+            'content': msg.content,
+            'timestamp': msg.timestamp.isoformat()
+        } for msg in evaluation.chat_messages]
+    }
+    
+    return jsonify(results)
