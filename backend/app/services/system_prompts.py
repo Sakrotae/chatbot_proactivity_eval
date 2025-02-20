@@ -1,5 +1,23 @@
 from app.models import UseCase, PromptType
 
+def get_prompt_goal(use_case: UseCase) -> str:
+    """
+    Get the goal of the prompt based on the use case.
+    """
+
+    goals = {
+        UseCase.HEALTH_CARE: '''
+        Use the chatbot for guidance on health topics, lifestyle improvements, and your overall well-being.''',
+        UseCase.EDUCATION: '''
+        Use the chatbot to learn and understand a complex topic of your choice.''',
+        UseCase.ACTIVITY_SUPPORT: '''
+        Use the chatbot to plan, manage, and optimize your daily activities and routines.''',
+        UseCase.AMBIENT_INTELLIGENCE: '''
+        Use the chatbot to explore, understand, and implement smart environment solutions that leverage IoT, context-aware computing, and other emerging technologies.'''
+    }
+
+    return goals[use_case]
+
 def get_system_prompt(use_case: UseCase, prompt_type: PromptType) -> str:
     """
     Get the appropriate system prompt based on use case and prompt type.

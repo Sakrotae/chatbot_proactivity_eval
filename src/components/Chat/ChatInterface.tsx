@@ -16,7 +16,8 @@ export const ChatInterface: React.FC = () => {
     chatHistory,
     addChatMessage,
     setStep,
-    evaluationId
+    evaluationId, 
+    userGoal
   } = useEvaluationStore();
 
   const scrollToBottom = () => {
@@ -25,7 +26,7 @@ export const ChatInterface: React.FC = () => {
 
   const sendInitialMessage = async () => {
     try {
-      const initialMessage = "Hallo, ich bin der User";
+      const initialMessage = "Introduce yourself to the user";
       const response = await sendChatMessage(evaluationId!, initialMessage, []);
 
       if (response.success) {
@@ -100,6 +101,9 @@ export const ChatInterface: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
+      <div className="bg-gray-100 p-4 border-b">
+        <h3 className="text-gray-700"><strong>Goal:</strong> {userGoal}</h3>
+      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {chatHistory.map((msg) => (
           <ChatMessage key={msg.id} message={msg} />
@@ -155,7 +159,7 @@ export const ChatInterface: React.FC = () => {
           onClick={handleComplete}
           className="mt-4 w-full py-2 bg-gray-100 rounded-lg hover:bg-gray-200
             disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-          disabled={chatHistory.length < 2}
+          disabled={chatHistory.length < 4}
         >
           Complete Chat Interaction
         </button>

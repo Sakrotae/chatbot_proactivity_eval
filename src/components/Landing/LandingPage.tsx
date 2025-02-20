@@ -12,8 +12,18 @@ export const LandingPage: React.FC = () => {
           Chatbot Evaluation Study
         </h1>
         
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-gray-600 mb-2">
           Help us by participating in this brief evaluation. Your feedback is valuable in enhancing the user experience.
+        </p>
+
+        <p className="text-lg text-gray-600 mb-2">
+          During this study, you'll interact with a chatbot to complete a specific task. You'll be given a goal to achieve through your conversation.
+        </p>
+        <p className="text-lg text-gray-600 mb-2">
+          If you haven't experienced the exact situation in real life, don't worry! You can imagine yourself in the scenario and interact accordingly.
+        </p>
+        <p className="font-medium text-lg text-gray-600 mb-8">
+          The key is to engage naturally with the chatbot while working towards your assigned goal.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -221,6 +221,7 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
       const data = await response.json();
       set({
         evaluationId: data.evaluation_id,
+        userGoal: data.config.user_goal,
         startTime: new Date(),
       });
     } catch (error) {

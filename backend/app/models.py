@@ -1,12 +1,13 @@
 from app import db
 from datetime import datetime
 from enum import Enum
+import json
 
 class QuestionType(Enum):
     LIKERT = 'likert'
     TEXT = 'text'
-    MULTIPLE_CHOICE = 'multiple_choice'
-    BOOLEAN = 'boolean'
+    NUMERIC = 'numeric'
+    DROPDOWN = 'dropdown'
 
 class LanguageModel(Enum):
     LLAMA = 'llama'
@@ -33,11 +34,32 @@ class Question(db.Model):
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # New fields for numeric type
+    min_value = db.Column(db.Float)
+    max_value = db.Column(db.Float)
+    step = db.Column(db.Float, default=1)
+    
+    # New field for dropdown options
+    _options = db.Column('options', db.String(1000))  # Store as JSON string
     
     responses = db.relationship('Response', backref='question', lazy=True)
 
+    @property
+    def options(self):
+        if self._options:
+            return json.loads(self._options)
+        return []
+
+    @options.setter
+    def options(self, value):
+        if value:
+            self._options = json.dumps(value)
+        else:
+            self._options = None
+
     def to_dict(self):
-        return {
+        data = {
             'id': self.id,
             'text': self.text,
             'type': self.type,
@@ -45,6 +67,17 @@ class Question(db.Model):
             'order': self.order,
             'survey_type': self.survey_type
         }
+        
+        if self.type == QuestionType.NUMERIC.value:
+            data.update({
+                'min_value': self.min_value,
+                'max_value': self.max_value,
+                'step': self.step
+            })
+        elif self.type == QuestionType.DROPDOWN.value:
+            data['options'] = self.options
+            
+        return data
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)

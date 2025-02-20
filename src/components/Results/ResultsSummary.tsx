@@ -3,9 +3,10 @@ import { useEvaluationStore } from '../../store/evaluationStore';
 import {Clock, MessageSquare } from 'lucide-react';
 
 export const ResultsSummary: React.FC = () => {
-  const { chatHistory, startTime, endTime } =
+  const { chatHistory, startTime } =
     useEvaluationStore();
 
+  let endTime = new Date();
   const duration = endTime && startTime
     ? Math.round((endTime.getTime() - startTime.getTime()) / 1000 / 60)
     : 0;

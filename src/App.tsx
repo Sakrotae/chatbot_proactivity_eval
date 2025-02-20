@@ -6,11 +6,10 @@ import { ResultsSummary } from './components/Results/ResultsSummary';
 import { DynamicSurvey } from './components/Survey/DynamicSurvey';
 
 function App() {
-  const { currentStep, startEvaluation, endEvaluation } = useEvaluationStore();
+  const { currentStep, startEvaluation } = useEvaluationStore();
 
   useEffect(() => {
     startEvaluation();
-    return () => endEvaluation();
   }, []);
 
   return (

@@ -8,6 +8,8 @@ from app.services.randomization import RandomizationService
 from datetime import datetime
 import uuid
 
+from app.services.system_prompts import get_prompt_goal
+
 @bp.route('/questions', methods=['GET'])
 def get_questions():
     survey_type = request.args.get('type', 'pre')  # 'pre' or 'post'
@@ -82,6 +84,7 @@ def start_evaluation():
     
     # Get random configuration
     language_model, use_case, prompt_type = RandomizationService.get_random_configuration()
+    user_goal = get_prompt_goal(use_case)
     
     evaluation = Evaluation(
         user_id=user.id,
@@ -98,7 +101,8 @@ def start_evaluation():
         'config': {
             'language_model': language_model.value,
             'use_case': use_case.value,
-            'prompt_type': prompt_type.value
+            'prompt_type': prompt_type.value,
+            'user_goal': user_goal
         }
     })
 
