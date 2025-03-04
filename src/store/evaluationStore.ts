@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import type { ChatMessage, EvaluationState, SurveyType } from "../types";
 
@@ -79,7 +80,7 @@ interface EvaluationStore extends EvaluationState {
   setError: (error: string | undefined) => void;
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "http://137.250.171.247:5000/api"; // "http://localhost:5000/api";
 
 export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
   currentStep: "landing",
@@ -197,7 +198,7 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
         ...state.chatHistory,
         {
           ...message,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           timestamp: new Date(),
         },
       ],
