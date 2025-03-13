@@ -1,6 +1,6 @@
 import { ChatMessage } from "../types";
 
-const API_BASE = "http://localhost:5000/api"; //"http://137.250.171.247:5000/api";
+const API_BASE = "http://137.250.171.247:5000/api"; // "http://localhost:5000/api";
 
 export const sendChatMessage = async (
   chatSessionId: number,
