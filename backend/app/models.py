@@ -18,7 +18,7 @@ class UseCase(Enum):
     HEALTH_CARE = 'health_care'
     EDUCATION = 'education'
     ACTIVITY_SUPPORT = 'activity_support'
-    AMBIENT_INTELLIGENCE = 'ambient_intelligence'
+    DEBATING = 'debating'
 
 class PromptType(Enum):
     STANDARD = 'standard'
@@ -82,7 +82,9 @@ class Question(db.Model):
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
-    evaluation_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
+    # chat_session_id only if is post-survey, eval_id is independent of chats
+    chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=True)
+    eval_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
     answer = db.Column(db.String(500), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -90,7 +92,7 @@ class Response(db.Model):
         return {
             'id': self.id,
             'question_id': self.question_id,
-            'evaluation_id': self.evaluation_id,
+            'chat_session_id': self.chat_session_id,
             'answer': self.answer,
             'created_at': self.created_at.isoformat()
         }
@@ -105,26 +107,48 @@ class Evaluation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     language_model = db.Column(db.String(36), nullable=False)
-    use_case = db.Column(db.String(36), nullable=False)
-    prompt_type = db.Column(db.String(36), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime)
-    responses = db.relationship('Response', backref='evaluation', lazy=True)
-    chat_messages = db.relationship('ChatMessage', backref='evaluation', lazy=True)
+    # Add relationship to chat sessions
+    chat_sessions = db.relationship('ChatSession', backref='evaluation', lazy=True)
 
     def to_dict(self):
         return {
             'id': self.id,
             'language_model': LanguageModel(self.language_model),
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat() if self.end_time else None,
+            'chat_sessions': [session.to_dict() for session in self.chat_sessions]
+        }
+
+# New model for chat sessions
+class ChatSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    evaluation_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
+    use_case = db.Column(db.String(36), nullable=False)
+    prompt_type = db.Column(db.String(36), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime)
+    completed = db.Column(db.Boolean, default=False)
+    # Add relationships
+    chat_messages = db.relationship('ChatMessage', backref='chat_session', lazy=True)
+    responses = db.relationship('Response', backref='chat_session', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'evaluation_id': self.evaluation_id,
             'use_case': UseCase(self.use_case),
             'prompt_type': PromptType(self.prompt_type),
             'start_time': self.start_time.isoformat(),
-            'end_time': self.end_time.isoformat() if self.end_time else None
+            'end_time': self.end_time.isoformat() if self.end_time else None,
+            'completed': self.completed
         }
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    evaluation_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
+    # Changed to link to chat_session instead of evaluation
+    chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
     sender = db.Column(db.String(10), nullable=False)
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
