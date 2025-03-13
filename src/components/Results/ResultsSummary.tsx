@@ -1,36 +1,70 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEvaluationStore } from '../../store/evaluationStore';
-import {Clock, MessageSquare } from 'lucide-react';
+import { LoadingSpinner } from '../common/LoadingSpinner';
+import { ErrorMessage } from '../common/ErrorMessage';
 
 export const ResultsSummary: React.FC = () => {
-  const { chatHistory, startTime } =
-    useEvaluationStore();
+  const { chatSessions, loading, error, allTopicsCompleted } = useEvaluationStore();
 
-  let endTime = new Date();
-  const duration = endTime && startTime
-    ? Math.round((endTime.getTime() - startTime.getTime()) / 1000 / 60)
-    : 0;
+  const formatUseCase = (useCase: string) => {
+    return useCase
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Thank you for participating</h1>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+      <h2 className="text-2xl font-bold text-center mb-6">Evaluation Complete</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-blue-50 p-6 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <MessageSquare className="text-blue-600" />
-            <h3 className="font-semibold">Messages</h3>
-          </div>
-          <p className="text-2xl font-bold">{chatHistory.length}</p>
+      {allTopicsCompleted ? (
+        <div className="text-center mb-8">
+          <p className="text-lg text-green-600 mb-4">
+            You have completed all the chat topics! Thank you for your participation.
+          </p>
+          <p className="text-gray-700">
+            Your feedback is valuable and will help us improve our chatbot systems.
+          </p>
         </div>
+      ) : (
+        <div className="text-center mb-8 text-yellow-600">
+          <p>The evaluation was ended before all topics were completed.</p>
+        </div>
+      )}
+      
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">Topics Completed</h3>
         
-        <div className="bg-blue-50 p-6 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="text-blue-600" />
-            <h3 className="font-semibold">Duration</h3>
+        {chatSessions.length === 0 ? (
+          <p className="text-gray-500 text-center">No chat sessions completed</p>
+        ) : (
+          <div className="space-y-4">
+            {chatSessions.map((session, index) => (
+              <div key={session.id} className="p-4 bg-gray-50 rounded-md">
+                <h4 className="font-medium">
+                  Topic {index + 1}: {formatUseCase(session.useCase)}
+                </h4>
+                <div className="mt-2 text-sm text-gray-600">
+                  <p>Messages: {session.chatHistory.length}</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <p className="text-2xl font-bold">{duration} minutes</p>
-        </div>
+        )}
+      </div>
+      
+      <div className="mt-10 text-center">
+        <p className="text-gray-600">
+          You may now close this window or refresh the page to start a new evaluation.
+        </p>
       </div>
     </div>
   );

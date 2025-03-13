@@ -31,7 +31,7 @@ class ChatService:
             "stream": False,
             "resp_format": "json",
             "options": {
-                "temperature": 0.0, 
+                "temperature": 0.5, 
                 "max_new_tokens": 4096,
                 "top_p": 0.95,
                 "top_k": 50, 

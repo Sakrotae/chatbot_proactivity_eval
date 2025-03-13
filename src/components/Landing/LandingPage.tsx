@@ -3,7 +3,7 @@ import { useEvaluationStore } from '../../store/evaluationStore';
 import { ArrowRight, MessageSquare, Clock, ThumbsUp } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { setStep } = useEvaluationStore();
+  const { startEvaluation } = useEvaluationStore();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
@@ -17,7 +17,7 @@ export const LandingPage: React.FC = () => {
         </p>
 
         <p className="text-lg text-gray-600 mb-2">
-          During this study, you'll interact with a chatbot to complete a specific task. You'll be given a goal to achieve through your conversation.
+          During this study, you'll interact with chatbots to complete a specific task. You'll be given a goal to achieve through your conversation.
         </p>
         <p className="text-lg text-gray-600 mb-2">
           If you haven't experienced the exact situation in real life, don't worry! You can imagine yourself in the scenario and interact accordingly.
@@ -33,7 +33,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">Interactive Chat</h3>
-              <p className="text-sm text-gray-500">Engage with our AI chatbot</p>
+              <p className="text-sm text-gray-500">Engage with our AI chatbot on different topics</p>
             </div>
           </div>
 
@@ -43,7 +43,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">Quick Process</h3>
-              <p className="text-sm text-gray-500">Takes about 5-10 minutes</p>
+              <p className="text-sm text-gray-500">Takes about 10-15 minutes</p>
             </div>
           </div>
 
@@ -69,7 +69,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setStep('pre-survey')}
+          onClick={() => startEvaluation()}
           className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold
             hover:bg-blue-700 transition-colors flex items-center justify-center gap-2
             focus:outline-none focus:ring-4 focus:ring-blue-200"

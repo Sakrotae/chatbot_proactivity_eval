@@ -1,41 +1,57 @@
-export type QuestionType = "likert" | "text" | "numeric" | "dropdown";
-export type SurveyType = "pre" | "post";
+export type SurveyType = 'pre' | 'post';
 
 export interface Question {
   id: number;
   text: string;
-  type: QuestionType;
+  type: string;
   required: boolean;
   order: number;
-  survey_type: SurveyType;
+  survey_type: string;
   min_value?: number;
   max_value?: number;
   step?: number;
   options?: string[];
 }
 
-export interface Response {
+export interface SurveyResponse {
   questionId: number;
   answer: string | number;
 }
 
 export interface ChatMessage {
   id: string;
+  sender: 'user' | 'bot';
   text: string;
-  sender: "user" | "bot";
   timestamp: Date;
 }
 
-export interface EvaluationState {
-  currentStep: "landing" | "pre-survey" | "chat" | "post-survey" | "results";
-  evaluationId?: number;
-  sessionId?: string;
-  userGoal?: string;
-  questions: Record<SurveyType, Question[]>;
-  responses: Record<SurveyType, Response[]>;
+export interface ChatSession {
+  id: number;
+  useCase: string;
+  promptType: string;
+  userGoal: string;
+  completed: boolean;
   chatHistory: ChatMessage[];
-  startTime?: Date;
-  endTime?: Date;
+  responses: SurveyResponse[];
+}
+
+export interface EvaluationState {
+  currentStep: 'landing' | 'pre-survey' | 'chat' | 'post-survey' | 'topic-transition' | 'results';
+  sessionId?: string;
+  evaluationId?: number;
+  currentChatSessionId?: number;
+  questions: {
+    pre: Question[];
+    post: Question[];
+  };
+  responses: {
+    pre: SurveyResponse[];
+    post: SurveyResponse[];
+  };
+  chatSessions: ChatSession[];
+  activeChatSession?: ChatSession;
+  remainingTopics: string[];
+  allTopicsCompleted: boolean;
   loading: boolean;
   error?: string;
 }

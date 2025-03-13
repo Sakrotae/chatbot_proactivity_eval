@@ -4,13 +4,10 @@ import { LandingPage } from './components/Landing/LandingPage';
 import { ChatInterface } from './components/Chat/ChatInterface';
 import { ResultsSummary } from './components/Results/ResultsSummary';
 import { DynamicSurvey } from './components/Survey/DynamicSurvey';
+import { TopicTransition } from './components/Chat/TopicTransition';
 
 function App() {
-  const { currentStep, startEvaluation } = useEvaluationStore();
-
-  useEffect(() => {
-    startEvaluation();
-  }, []);
+  const { currentStep } = useEvaluationStore();
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -18,6 +15,7 @@ function App() {
       {currentStep === 'pre-survey' && <DynamicSurvey type="pre" />}
       {currentStep === 'chat' && <ChatInterface />}
       {currentStep === 'post-survey' && <DynamicSurvey type="post" />}
+      {currentStep === 'topic-transition' && <TopicTransition />}
       {currentStep === 'results' && <ResultsSummary />}
     </div>
   );
