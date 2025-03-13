@@ -7,7 +7,8 @@ import { sendChatMessage } from '../../services/api';
 
 
 export const ChatInterface: React.FC = () => {
-const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSendInitialMessage, setIsSendInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initialMessageSentRef = useRef(false);
   
@@ -18,12 +19,12 @@ const [message, setMessage] = useState('');
     sendMessage,
     endCurrentChatSession,
     setError,
-    addChatMessage, setLoading, currentChatSessionId
+    addChatMessage, currentChatSessionId
   } = useEvaluationStore();
 
   const sendInitialMessage = async () => {
     try {
-      setLoading(true);
+      setIsSendInitialMessage(true);
       const initialMessage = "Introduce yourself to the user";
       const response = await sendChatMessage(currentChatSessionId!, initialMessage, []);
 
@@ -38,7 +39,7 @@ const [message, setMessage] = useState('');
       setError('Failed to send initial message');
     }
     finally{
-      setLoading(false);
+      setIsSendInitialMessage(false);
     }
   }
 
@@ -75,7 +76,13 @@ const [message, setMessage] = useState('');
       <div className="bg-gray-100 p-4 border-b">
         <h3 className="text-gray-700"><strong>Goal:</strong> {activeChatSession?.userGoal}</h3>
       </div>
+      
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {isSendInitialMessage && (
+          <div className="flex justify-center py-4">
+            <LoadingSpinner size="sm" />
+          </div>
+        )}
         
         {activeChatSession?.chatHistory.map((msg) => (
           <ChatMessage key={msg.id} message={msg} />
@@ -113,7 +120,7 @@ const [message, setMessage] = useState('');
           />
           <button
             onClick={handleSend}
-            disabled={loading || !message.trim()}
+            disabled={loading || isSendInitialMessage || !message.trim()}
             className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700
               disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
