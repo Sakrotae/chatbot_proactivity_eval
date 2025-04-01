@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { useEvaluationStore } from './store/evaluationStore';
 import { LandingPage } from './components/Landing/LandingPage';
 import { ChatInterface } from './components/Chat/ChatInterface';
