@@ -8,7 +8,7 @@ from app.services.system_prompts import get_system_prompt
 class ChatService:
     API_ENDPOINTS = {
         LanguageModel.LLAMA: "http://137.250.171.154:11434/api/chat",
-        #LanguageModel.GPT4O: "http://137.250.171.154:5050/api/chat",
+        #LanguageModel.GPT4O: "http://137.250.171.154:5050/api/chat", # wait for openai key
         LanguageModel.R1: "http://137.250.171.154:11434/api/chat"
     }
     
@@ -46,7 +46,7 @@ class ChatService:
             })
         elif self.language_model == LanguageModel.R1:
             base_config.update({
-                "model": "llama3.1",
+                "model": "deepseek-r1:8b",
                 "provider": "ollama"
             })
         else:
@@ -75,7 +75,7 @@ class ChatService:
                 data = response.json()
                 return {
                     "success": True,
-                    "content": data["message"]["content"],
+                    "content": data["message"]["content"].split("</think>")[1].strip(), # remove think part if present
                     "timestamp": datetime.utcnow().isoformat()
                 }
             
