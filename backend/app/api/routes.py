@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, g
 import asyncio
 from app import db
 from app.api import bp
@@ -7,6 +7,9 @@ from app.services.chat_service import ChatService
 from app.services.randomization import RandomizationService
 from datetime import datetime
 import uuid
+from app.logging_config import get_logger, log_exception
+
+logger = get_logger(__name__)
 
 from app.services.system_prompts import get_prompt_goal
 
@@ -41,6 +44,15 @@ def submit_responses():
     
     missing_required = required_ids - submitted_ids
     if missing_required:
+        logger.warning(
+                f"Missing required questions in {survey_type} survey submission",
+                extra={
+                    'missing_questions': list(missing_required),
+                    'survey_type': survey_type,
+                    'correlation_id': g.get('correlation_id')
+                }
+            )
+        
         return jsonify({
             'error': 'Missing required questions',
             'missing_questions': list(missing_required)
@@ -68,6 +80,12 @@ def submit_responses():
         return jsonify({'status': 'success'})
     except Exception as e:
         db.session.rollback()
+        log_exception(logger, e, {
+            'survey_type': survey_type,
+            'chat_session_id': chat_session_id,
+            'eval_id': eval_id,
+            'correlation_id': g.get('correlation_id')
+        })
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/session', methods=['POST'])
@@ -200,12 +218,26 @@ def process_chat_message():
                 }
             })
         
+        logger.error(
+            f"Failed to process chat message",
+            extra={
+                'error': result['error'],
+                'chat_session_id': chat_session_id,
+                'correlation_id': g.get('correlation_id')
+            }
+        )
+        
         return jsonify({
             'success': False,
             'error': result['error']
         }), 500
         
     except Exception as e:
+        db.session.rollback()
+        log_exception(logger, e, {
+            'chat_session_id': data.get('chatSessionId') if 'data' in locals() else None,
+            'correlation_id': g.get('correlation_id')
+        })
         return jsonify({
             'success': False,
             'error': str(e)

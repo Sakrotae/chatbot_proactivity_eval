@@ -4,6 +4,9 @@ from datetime import datetime
 import json
 from app.models import LanguageModel, UseCase, PromptType
 from app.services.system_prompts import get_system_prompt
+from app.logging_config import get_logger, log_exception
+
+logger = get_logger(__name__)
 
 class ChatService:
     API_ENDPOINTS = {
@@ -75,7 +78,7 @@ class ChatService:
                 data = response.json()
                 return {
                     "success": True,
-                    "content": data["message"]["content"].split("</think>")[1].strip(), # remove think part if present
+                    "content": data["message"]["content"].split("</think>", 1)[1].strip() if "</think>" in data["message"]["content"] else data["message"]["content"].strip(),
                     "timestamp": datetime.utcnow().isoformat()
                 }
             
@@ -85,13 +88,15 @@ class ChatService:
                 "timestamp": datetime.utcnow().isoformat()
             }
             
-        except requests.Timeout:
+        except requests.Timeout as e:
+            log_exception(logger, e, {'chat_history': chat_history})
             return {
                 "success": False,
                 "error": "Request timed out",
                 "timestamp": datetime.utcnow().isoformat()
             }
         except Exception as e:
+            log_exception(logger, e, {'chat_history': chat_history})
             return {
                 "success": False,
                 "error": str(e),
