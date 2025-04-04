@@ -68,7 +68,7 @@ class ChatService:
                 self.api_url,
                 json=payload,
                 headers=headers,
-                timeout=30
+                timeout=100
             )
             
             if response.status_code == 200:
