@@ -20,14 +20,6 @@ class RandomizationService:
         prompt_types = list(PromptType)
         return random.choice(prompt_types)
     
-    @staticmethod
-    def get_random_configuration():
-        """Get a complete random configuration"""
-        return (
-            RandomizationService.get_random_language_model(),
-            RandomizationService.get_random_use_case(),
-            RandomizationService.get_random_prompt_type()
-        )
     
     @staticmethod
     def get_domain_sequence():

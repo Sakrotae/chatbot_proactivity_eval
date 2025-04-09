@@ -106,7 +106,7 @@ class User(db.Model):
 class Evaluation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    language_model = db.Column(db.String(36), nullable=False)
+    
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime)
     # Add relationship to chat sessions
@@ -115,7 +115,6 @@ class Evaluation(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'language_model': LanguageModel(self.language_model),
             'start_time': self.start_time.isoformat(),
             'end_time': self.end_time.isoformat() if self.end_time else None,
             'chat_sessions': [session.to_dict() for session in self.chat_sessions]
@@ -126,6 +125,7 @@ class ChatSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     evaluation_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
     use_case = db.Column(db.String(36), nullable=False)
+    language_model = db.Column(db.String(36), nullable=False)
     prompt_type = db.Column(db.String(36), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime)
@@ -138,6 +138,7 @@ class ChatSession(db.Model):
         return {
             'id': self.id,
             'evaluation_id': self.evaluation_id,
+            'language_model': LanguageModel(self.language_model),
             'use_case': UseCase(self.use_case),
             'prompt_type': PromptType(self.prompt_type),
             'start_time': self.start_time.isoformat(),

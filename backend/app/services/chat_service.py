@@ -76,9 +76,20 @@ class ChatService:
             
             if response.status_code == 200:
                 data = response.json()
+                content = data["message"]["content"]
+                reasoning = None
+                
+                # Extract reasoning content if present
+                if "<think>" in content and "</think>" in content:
+                    parts = content.split("</think>", 1)
+                    reasoning_with_tag = parts[0]
+                    reasoning = reasoning_with_tag.split("<think>", 1)[1].strip()
+                    content = parts[1].strip()
+                
                 return {
                     "success": True,
-                    "content": data["message"]["content"].split("</think>", 1)[1].strip() if "</think>" in data["message"]["content"] else data["message"]["content"].strip(),
+                    "content": content,
+                    "reasoning": reasoning,
                     "timestamp": datetime.utcnow().isoformat()
                 }
             

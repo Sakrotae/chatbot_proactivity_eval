@@ -413,6 +413,7 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
         get().addChatMessage({
           sender: "bot",
           text: result.message.content,
+          reasoning: result.message.reasoning,
         });
       } else {
         set({ error: result.error });

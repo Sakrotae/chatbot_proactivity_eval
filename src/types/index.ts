@@ -1,4 +1,4 @@
-export type SurveyType = 'pre' | 'post';
+export type SurveyType = "pre" | "post";
 
 export interface Question {
   id: number;
@@ -20,8 +20,9 @@ export interface SurveyResponse {
 
 export interface ChatMessage {
   id: string;
-  sender: 'user' | 'bot';
+  sender: "user" | "bot";
   text: string;
+  reasoning?: string;
   timestamp: Date;
 }
 
@@ -36,7 +37,13 @@ export interface ChatSession {
 }
 
 export interface EvaluationState {
-  currentStep: 'landing' | 'pre-survey' | 'chat' | 'post-survey' | 'topic-transition' | 'results';
+  currentStep:
+    | "landing"
+    | "pre-survey"
+    | "chat"
+    | "post-survey"
+    | "topic-transition"
+    | "results";
   sessionId?: string;
   evaluationId?: number;
   currentChatSessionId?: number;

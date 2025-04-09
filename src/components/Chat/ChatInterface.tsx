@@ -31,6 +31,7 @@ export const ChatInterface: React.FC = () => {
       if (response.success) {
         addChatMessage({
           text: response.message.content,
+          reasoning: response.message.reasoning,
           sender: 'bot',
         });
       }

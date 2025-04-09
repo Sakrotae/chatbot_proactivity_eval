@@ -1,8 +1,8 @@
-"""Initial migration.
+"""init
 
-Revision ID: 06b0e304790e
+Revision ID: f602b5dda221
 Revises: 
-Create Date: 2025-03-13 01:31:17.235450
+Create Date: 2025-04-09 02:47:16.811408
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '06b0e304790e'
+revision: str = 'f602b5dda221'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -46,7 +46,6 @@ def upgrade() -> None:
     op.create_table('evaluation',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('language_model', sa.String(length=36), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=False),
     sa.Column('end_time', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
@@ -56,6 +55,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('evaluation_id', sa.Integer(), nullable=False),
     sa.Column('use_case', sa.String(length=36), nullable=False),
+    sa.Column('language_model', sa.String(length=36), nullable=False),
     sa.Column('prompt_type', sa.String(length=36), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=False),
     sa.Column('end_time', sa.DateTime(), nullable=True),

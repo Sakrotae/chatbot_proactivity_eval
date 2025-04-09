@@ -103,12 +103,8 @@ def start_evaluation():
     session_id = request.json.get('session_id')
     user = User.query.filter_by(session_id=session_id).first_or_404()
     
-    # Get random language model
-    language_model = RandomizationService.get_random_language_model()
-    
     evaluation = Evaluation(
         user_id=user.id,
-        language_model=language_model.value,
         start_time=datetime.utcnow()
     )
     db.session.add(evaluation)
@@ -116,9 +112,6 @@ def start_evaluation():
     
     return jsonify({
         'evaluation_id': evaluation.id,
-        'config': {
-            'language_model': language_model.value
-        }
     })
 
 @bp.route('/chat/session', methods=['POST'])
@@ -135,6 +128,9 @@ def start_chat_session():
     
     # Get random prompt type
     prompt_type = RandomizationService.get_random_prompt_type()
+
+    # Get random language model
+    language_model = RandomizationService.get_random_language_model()
     
     # Get user goal for this use case
     user_goal = get_prompt_goal(use_case)
@@ -143,6 +139,7 @@ def start_chat_session():
     chat_session = ChatSession(
         evaluation_id=evaluation_id,
         use_case=use_case.value,
+        language_model=language_model.value,
         prompt_type=prompt_type.value,
         start_time=datetime.utcnow()
     )
@@ -154,7 +151,8 @@ def start_chat_session():
         'config': {
             'use_case': use_case.value,
             'prompt_type': prompt_type.value,
-            'user_goal': user_goal
+            'user_goal': user_goal,
+            'language_model': language_model.value
         }
     })
 
@@ -185,7 +183,7 @@ def process_chat_message():
         
         # Initialize chat service with configuration
         chat_service = ChatService(
-            language_model=LanguageModel(evaluation.language_model),
+            language_model=LanguageModel(chat_session.language_model),
             use_case=UseCase(chat_session.use_case),
             prompt_type=PromptType(chat_session.prompt_type)
         )
@@ -214,6 +212,7 @@ def process_chat_message():
                 'message': {
                     'id': bot_message.id,
                     'content': bot_message.content,
+                    'reasoning': result.get('reasoning'),
                     'timestamp': bot_message.timestamp.isoformat()
                 }
             })
