@@ -48,6 +48,25 @@ docker-compose up -d
   - Flask-CORS
   - SQLite database
 
+## Handling Backend Data Structure Changes
+
+If you make changes to the data structure in `backend/app/models.py`, follow these steps to apply the changes to the database:
+
+1. Navigate to the `backend` directory:
+```bash
+cd backend
+```
+
+2. Create a migration file:
+```bash
+flask db migrate -m "Describe your changes here"
+```
+
+3. Apply the migration to update the database:
+```bash
+flask db upgrade
+```
+
 ## License
 
 MIT
