@@ -148,7 +148,6 @@ class ChatSession(db.Model):
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # Changed to link to chat_session instead of evaluation
     chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
     sender = db.Column(db.String(10), nullable=False)
     content = db.Column(db.Text, nullable=False)

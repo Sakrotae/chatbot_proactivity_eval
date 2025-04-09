@@ -5,7 +5,6 @@ import { Send, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { sendChatMessage } from '../../services/api';
 
-
 export const ChatInterface: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSendInitialMessage, setIsSendInitialMessage] = useState(false);
@@ -22,6 +21,10 @@ export const ChatInterface: React.FC = () => {
     addChatMessage, currentChatSessionId
   } = useEvaluationStore();
 
+  /**
+   * Sends an initial message to introduce the bot to the user.
+   * This is triggered when a new chat session starts.
+   */
   const sendInitialMessage = async () => {
     try {
       setIsSendInitialMessage(true);
@@ -44,10 +47,17 @@ export const ChatInterface: React.FC = () => {
     }
   }
 
+  /**
+   * Scrolls the chat view to the latest message whenever the chat history updates.
+   */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeChatSession?.chatHistory]);
 
+  /**
+   * Sends the initial message when a new chat session ID is detected.
+   * Ensures the initial message is sent only once per session.
+   */
   useEffect(() => {
     if (!initialMessageSentRef.current && currentChatSessionId) {
       initialMessageSentRef.current = true;
@@ -55,7 +65,10 @@ export const ChatInterface: React.FC = () => {
     }
   }, [currentChatSessionId]);
 
-
+  /**
+   * Handles sending a user message.
+   * Clears the input field and sends the message to the backend.
+   */
   const handleSend = async () => {
     if (!message.trim()) return;
     const message_copy = message;
@@ -68,6 +81,10 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
+  /**
+   * Ends the current chat session.
+   * This is triggered when the user clicks the "Complete Chat Interaction" button.
+   */
   const handleComplete = () => {
     endCurrentChatSession();
   };

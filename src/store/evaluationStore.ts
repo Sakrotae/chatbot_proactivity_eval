@@ -12,6 +12,9 @@ import type {
   SurveyType,
 } from "../types";
 
+/**
+ * These are used as fallback in case the API fails to fetch questions.
+ */
 const PRE_QUESTIONS_EXAMPLES = [
   {
     id: 1,
@@ -117,8 +120,16 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
   allTopicsCompleted: false,
   loading: false,
 
+  /**
+   * Sets the current step in the evaluation process.
+   * @param step - The step to set as the current step.
+   */
   setStep: (step) => set({ currentStep: step }),
 
+  /**
+   * Initializes a new session by requesting a session ID from the API.
+   * Updates the state with the session ID.
+   */
   initializeSession: async () => {
     try {
       set({ loading: true });
@@ -134,6 +145,11 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Fetches survey questions (pre or post) from the API.
+   * Falls back to example questions if the API request fails.
+   * @param type - The type of survey ("pre" or "post").
+   */
   fetchQuestions: async (type) => {
     try {
       set({ loading: true });
@@ -159,6 +175,11 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Submits user responses for the specified survey type to the API.
+   * Clears responses and moves to the next step after successful submission.
+   * @param type - The type of survey ("pre" or "post").
+   */
   submitResponses: async (type) => {
     const { currentChatSessionId, responses, evaluationId } = get();
     try {
@@ -207,6 +228,12 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Updates or adds a response for a specific question in the survey.
+   * @param type - The type of survey ("pre" or "post").
+   * @param questionId - The ID of the question being answered.
+   * @param answer - The user's answer to the question.
+   */
   setResponse: (type, questionId, answer) => {
     set((state) => {
       const existingResponses = state.responses[type];
@@ -234,6 +261,11 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     });
   },
 
+  /**
+   * Adds a new chat message to the active chat session's history.
+   * Updates the chat session in the state.
+   * @param message - The message to add (excluding ID and timestamp).
+   */
   addChatMessage: (message) =>
     set((state) => {
       const newMessage = {
@@ -265,6 +297,10 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
       return state;
     }),
 
+  /**
+   * Starts the evaluation process by creating an evaluation session.
+   * Fetches pre-survey questions and sets the current step to "pre-survey".
+   */
   startEvaluation: async () => {
     let { sessionId } = get();
     if (!sessionId) {
@@ -295,6 +331,10 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Starts the next chat session by fetching the next topic and creating a new session.
+   * Updates the state with the new chat session and fetches post-survey questions.
+   */
   startNextChatSession: async () => {
     const { evaluationId } = get();
     try {
@@ -346,6 +386,10 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Ends the current chat session by marking it as completed.
+   * Updates the state and moves to the "post-survey" step.
+   */
   endCurrentChatSession: () => {
     set((state) => {
       if (!state.activeChatSession) return state;
@@ -371,6 +415,10 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     });
   },
 
+  /**
+   * Ends the evaluation process by marking all topics as completed.
+   * Sets the current step to "results".
+   */
   endEvaluation: () => {
     set({
       currentStep: "results",
@@ -378,10 +426,24 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     });
   },
 
+  /**
+   * Sets an error message in the state.
+   * @param error - The error message to set.
+   */
   setError: (error) => set({ error }),
 
+  /**
+   * Sets the loading state.
+   * @param loading - A boolean indicating whether loading is in progress.
+   */
   setLoading: (loading: boolean) => set({ loading }),
 
+  /**
+   * Sends a message to the chatbot API and updates the chat history with the bot's response.
+   * Adds the user's message to the chat history if it's not the initial message.
+   * @param message - The message to send.
+   * @param isInitial - Whether this is the initial message in the chat session.
+   */
   sendMessage: async (message, isInitial = false) => {
     const { currentChatSessionId, activeChatSession } = get();
 
@@ -428,6 +490,10 @@ export const useEvaluationStore = create<EvaluationStore>((set, get) => ({
     }
   },
 
+  /**
+   * Checks if there are more topics available for the evaluation.
+   * Updates the state to transition to the next topic or mark all topics as completed.
+   */
   checkNextTopic: async () => {
     const { evaluationId } = get();
     try {

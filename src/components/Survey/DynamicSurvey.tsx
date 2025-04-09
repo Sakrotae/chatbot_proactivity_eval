@@ -21,6 +21,7 @@ export const DynamicSurvey: React.FC<DynamicSurveyProps> = ({ type }) => {
     activeChatSession
   } = useEvaluationStore();
 
+  // Fetch survey questions when the component is mounted or when the survey type changes
   useEffect(() => {
     fetchQuestions(type);
   }, [type]);
@@ -34,6 +35,7 @@ export const DynamicSurvey: React.FC<DynamicSurveyProps> = ({ type }) => {
     setResponse(type, questionId, value);
   };
 
+  // Check if all required questions have been answered
   const isComplete = questions[type].every(q => {
     if (!q.required) return true;
     const response = responses[type].find(r => r.questionId === q.id);

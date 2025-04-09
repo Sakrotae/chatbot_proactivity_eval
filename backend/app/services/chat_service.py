@@ -16,19 +16,45 @@ class ChatService:
     }
     
     def __init__(self, language_model: LanguageModel, use_case: UseCase, prompt_type: PromptType):
+        """
+        Initialize the ChatService with the specified language model, use case, and prompt type.
+        
+        Args:
+            language_model: The language model to use for the chat service.
+            use_case: The use case for the chatbot (e.g., health care, education).
+            prompt_type: The type of prompt (e.g., standard or proactive).
+        """
         self.language_model = language_model
         self.use_case = use_case
         self.prompt_type = prompt_type
         self.api_url = self.API_ENDPOINTS[language_model]
     
     def format_messages(self, chat_history: List[Dict[str, str]]) -> List[Dict[str, str]]:
-        system_prompt = get_system_prompt(self.use_case, self.prompt_type)
+        """
+        Format the chat history by prepending the system prompt to the messages.
+        
+        Args:
+            chat_history: A list of dictionaries representing the chat history.
+        
+        Returns:
+            A list of dictionaries with the system prompt as the first message.
+        """
+        system_prompt = get_system_prompt(self.use_case, self.prompt_type, self.language_model)
         return [
             {"role": "system", "content": system_prompt},
             *chat_history
         ]
     
     def create_payload(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
+        """
+        Create the payload for the API request based on the messages and model-specific configurations.
+        
+        Args:
+            messages: A list of dictionaries representing the formatted chat messages.
+        
+        Returns:
+            A dictionary containing the payload for the API request.
+        """
         base_config = {
             "messages": messages,
             "stream": False,
@@ -58,10 +84,18 @@ class ChatService:
                 "provider": "ollama"
             })
 
-            
         return base_config
     
     async def process_chat(self, chat_history: List[Dict[str, str]]) -> Dict[str, Any]:
+        """
+        Process the chat by sending the formatted messages to the API and handling the response.
+        
+        Args:
+            chat_history: A list of dictionaries representing the chat history.
+        
+        Returns:
+            A dictionary containing the success status, content, reasoning (if any), and timestamp.
+        """
         try:
             messages = self.format_messages(chat_history)
             payload = self.create_payload(messages)

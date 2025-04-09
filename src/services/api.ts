@@ -5,6 +5,13 @@ const API_BASE =
     ? "http://localhost:5000/api"
     : "http://137.250.171.247:5000/api";
 
+/**
+ * Sends a chat message to the server along with the chat history.
+ * @param chatSessionId - The ID of the current chat session.
+ * @param message - The message to be sent.
+ * @param history - The chat history containing previous messages.
+ * @returns A promise resolving to the server's response.
+ */
 export const sendChatMessage = async (
   chatSessionId: number,
   message: string,
@@ -37,6 +44,11 @@ export const sendChatMessage = async (
   }
 };
 
+/**
+ * Retrieves the next topic for the chat session based on the evaluation ID.
+ * @param evaluationId - The ID of the evaluation.
+ * @returns A promise resolving to the next topic data from the server.
+ */
 export const getNextTopic = async (evaluationId: number): Promise<any> => {
   try {
     const response = await fetch(
@@ -54,6 +66,12 @@ export const getNextTopic = async (evaluationId: number): Promise<any> => {
   }
 };
 
+/**
+ * Starts a new chat session for a given evaluation ID and optional use case.
+ * @param evaluationId - The ID of the evaluation.
+ * @param useCase - (Optional) The specific use case for the chat session.
+ * @returns A promise resolving to the server's response for the new session.
+ */
 export const startChatSession = async (
   evaluationId: number,
   useCase?: string
