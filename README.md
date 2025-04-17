@@ -99,6 +99,12 @@ API_BASE=http://backend:5000/api
 docker-compose up -d
 ```
 
+5. If the database is new, connect to the backend container and run the following command to add the survey questions to the database:
+```bash
+docker exec -it <backend_container_name> python seed.py
+```
+Replace `<backend_container_name>` with the name of your backend container (e.g., `chatbot_proactivity_eval_backend_1`).
+
 ### Local Development Setup
 
 1. Clone the repository and navigate to the project directory
